@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Plataforma</title>
+  <style>
+    :root{--ink:#14243d;--mute:#5a677d;--line:#dce3ee;--soft:#f5f7fb;--brand:#3154d8;--brand-soft:#eef2fd;
+      --ok:#137a43;--ok-bg:#e6f4ec;--warn:#9a5b00;--warn-bg:#fff3dc;--bad:#b42318;--bad-bg:#fdecea;--obs:#6941c6;--obs-bg:#f1ecfb}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--soft);color:var(--ink);font:15px/1.5 Arial,Helvetica,sans-serif}
+    button,input,select,textarea{font:inherit;color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}
+    .muted{color:var(--mute);font-size:13px}
+    h1{font-size:22px;margin:4px 0 14px} h2{font-size:18px;margin:0 0 12px} h3{font-size:15px;margin:18px 0 8px}
+    .btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
+    .btn.sec{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+    .btn.min{padding:6px 10px;font-size:13px}
+    .btn:disabled{opacity:.55;cursor:wait}
+    label{display:block;font-weight:bold;font-size:13px;margin:0 0 5px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
+    textarea{min-height:96px;resize:vertical;font-family:Consolas,monospace;font-size:13px}
+    .msg{min-height:22px;margin:10px 0 0;white-space:pre-line}.msg.err{color:var(--bad)}
+    [hidden]{display:none!important}
+    /* login */
+    #login{max-width:480px;margin:40px auto}
+    .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 16px}
+    .rol{border:1px solid var(--line);background:#fff;border-radius:8px;padding:11px 4px;cursor:pointer}
+    .rol[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:bold}
+    #login .btn{width:100%;margin-top:14px}
+    /* app */
+    header.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+    .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer}
+    .tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .grid{display:grid;gap:12px}.g2{grid-template-columns:2fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+    .kpi{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+    .kpi b{display:block;font-size:22px;line-height:1.2}.kpi span{font-size:12px;color:var(--mute)}
+    .pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:bold;white-space:nowrap}
+    .p-Pagado{background:var(--ok-bg);color:var(--ok)}.p-No-pagado{background:var(--warn-bg);color:var(--warn)}
+    .p-Observado{background:var(--obs-bg);color:var(--obs)}.p-Inválido{background:var(--bad-bg);color:var(--bad)}
+    .p-Alta{background:var(--bad-bg);color:var(--bad)}.p-Media{background:var(--warn-bg);color:var(--warn)}
+    .p-Baja{background:var(--brand-soft);color:var(--brand)}.p-Sin-pendientes{background:var(--ok-bg);color:var(--ok)}
+    .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+    table{border-collapse:collapse;width:100%;font-size:13px}
+    th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:#f8fafc;position:sticky;top:0;font-size:12px;color:var(--mute);white-space:nowrap}
+    td.num,th.num{text-align:right;white-space:nowrap}
+    td.corto{max-width:280px;color:var(--mute);font-size:12px} td.corto span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    tr.click{cursor:pointer} tr.click:hover td{background:#f8faff}
+    .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px;font-size:13px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+    .nf{background:var(--warn-bg);border-radius:8px;padding:10px;font-size:13px;margin:10px 0;word-break:break-all}
+    /* historial */
+    .overlay{position:fixed;inset:0;background:rgba(20,36,61,.45);display:flex;justify-content:flex-end;z-index:10}
+    .drawer{width:min(620px,100%);height:100%;overflow:auto;background:#fff;padding:20px}
+    .entry{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+    .entry.cur{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+    .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .thumbs img{max-width:180px;max-height:240px;border:1px solid var(--line);border-radius:6px;cursor:zoom-in}
+    .big{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:20}
+    .big img{max-width:92vw;max-height:92vh;background:#fff}
+    dl.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 10px;margin:0;font-size:13px} dl.kv dt{color:var(--mute)} dl.kv dd{margin:0}
+    @media(max-width:820px){.g2,.g4{grid-template-columns:1fr}.roles{grid-template-columns:1fr}dl.kv{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="login" class="card">
+    <p class="muted">Plataforma</p>
+    <h1>Ingresar</h1>
+    <div class="roles" role="group" aria-label="Rol">
+      <button type="button" class="rol" data-rol="supervisor" aria-pressed="true">Supervisor</button>
+      <button type="button" class="rol" data-rol="gtm" aria-pressed="false">GTM</button>
+      <button type="button" class="rol" data-rol="admin" aria-pressed="false">Administrador</button>
+    </div>
+    <form id="form">
+      <label for="clave">Contraseña</label>
+      <input id="clave" type="password" autocomplete="current-password" maxlength="200" required>
+      <button class="btn" id="entrar" type="submit">Ingresar</button>
+    </form>
+    <p id="msgLogin" class="msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="app" hidden>
+    <header class="top">
+      <div><p class="muted" id="cargaInfo">Plataforma</p><h1 id="titulo" style="margin:0">Consolidado de pagos</h1></div>
+      <div class="row"><span class="muted" id="rolInfo"></span><button class="btn sec min" id="salir" type="button">Salir</button></div>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="consulta" aria-selected="true">Consulta</button>
+      <button class="tab" role="tab" data-tab="panel" aria-selected="false" hidden>Panel GTM</button>
+      <button class="tab" role="tab" data-tab="admin" aria-selected="false" hidden>Administración</button>
+    </nav>
+
+    <!-- CONSULTA -->
+    <section id="tab-consulta">
+      <div class="card">
+        <div class="grid g2">
+          <div>
+            <label for="imeis">IMEI o lista de IMEI</label>
+            <textarea id="imeis" placeholder="Pega una columna o lista de Excel. 15 dígitos por IMEI, hasta 5.000."></textarea>
+            <p class="muted" id="imeiCount">0 IMEI</p>
+          </div>
+          <div>
+            <label for="ref">Nombre o referencia (opcional)</label>
+            <input id="ref" placeholder="Asesor, promotor, supervisor, PDV o ID de pago">
+            <div style="height:10px"></div>
+            <label for="fEstado">Estado</label>
+            <select id="fEstado"><option value="">Todos los estados</option></select>
+          </div>
+        </div>
+        <div class="grid g4" style="margin-top:12px">
+          <div><label for="fSup">Supervisor</label><select id="fSup"><option value="">Todos los supervisores</option></select></div>
+          <div><label for="fPro">Promotor</label><select id="fPro"><option value="">Todos los promotores</option></select></div>
+          <div><label for="fArch">IMEI presente en archivo</label><select id="fArch"><option value="">Todos los archivos</option></select></div>
+          <div class="row" style="align-items:flex-end"><button class="btn" id="consultar" type="button">Consultar</button>
+            <button class="btn sec" id="todo" type="button">Ver todo</button><button class="btn sec" id="limpiar" type="button">Limpiar</button></div>
+        </div>
+        <p class="muted" style="margin:10px 0 0">El estado vigente se calcula con todos los cortes. Filtrar por un archivo muestra los IMEI presentes en él, con su estado vigente.</p>
+        <p id="msgConsulta" class="msg" role="status" aria-live="polite"></p>
+      </div>
+      <div id="resultado" class="card" style="margin-top:14px" hidden>
+        <div class="row" style="justify-content:space-between"><h2 id="resTitulo" style="margin:0"></h2>
+          <div class="row"><button class="btn sec min" id="dlXlsx" type="button">Descargar Excel</button><button class="btn sec min" id="dlCsv" type="button">Descargar CSV</button></div></div>
+        <div class="chips" id="chips"></div>
+        <div id="noEnc"></div>
+        <div class="tablewrap"><table id="tabla"></table></div>
+        <div class="pager"><button class="btn sec min" id="prev" type="button">Anterior</button><span id="pagInfo"></span><button class="btn sec min" id="next" type="button">Siguiente</button></div>
+      </div>
+    </section>
+
+    <!-- PANEL GTM -->
+    <section id="tab-panel" hidden>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">Panel GTM</h2>
+          <div class="row"><select id="pSup" style="width:auto;min-width:240px"><option value="">Todos los supervisores</option></select>
+            <button class="btn sec min" id="pDl" type="button">Descargar Excel</button></div>
+        </div>
+        <p id="msgPanel" class="msg" role="status" aria-live="polite"></p>
+        <div class="kpis" id="pKpis"></div>
+        <p class="muted" id="pReglas"></p>
+        <h3>Puntos de venta por prioridad</h3><div class="tablewrap" style="max-height:420px"><table id="pPdv"></table></div>
+        <h3>Supervisores</h3><div class="tablewrap" style="max-height:420px"><table id="pSupT"></table></div>
+        <div class="grid g2" style="grid-template-columns:1fr 1fr">
+          <div><h3>Modelos pagados</h3><div class="tablewrap" style="max-height:360px"><table id="pMod"></table></div></div>
+          <div><h3>Cierre mensual</h3><div class="tablewrap" style="max-height:360px"><table id="pCierre"></table></div></div>
+        </div>
+        <h3>Evolución por corte</h3><div class="tablewrap" style="max-height:360px"><table id="pEvo"></table></div>
+        <h3 id="pPendTit">Pendientes</h3><div class="tablewrap" style="max-height:480px"><table id="pPend"></table></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="tab-admin" hidden>
+      <div class="card">
+        <h2>Administración</h2>
+        <p id="msgAdmin" class="msg" role="status" aria-live="polite"></p>
+        <h3>Carga activa</h3><div id="aActiva" class="muted">Sin carga publicada.</div>
+        <h3>Publicaciones en Drive</h3>
+        <p class="muted">Sube a la carpeta de Drive la carpeta <b>publicacion_…</b> que genera el preparador y pulsa Publicar. Volver a publicar la misma carga no duplica datos.</p>
+        <div class="tablewrap"><table id="aDisp"></table></div>
+        <h3>Incidencias de la carga activa</h3><div class="tablewrap" style="max-height:360px"><table id="aInc"></table></div>
+        <p class="muted" id="aHoja"></p>
+      </div>
+    </section>
+  </section>
+</div>
+
+<div id="hist" class="overlay" hidden><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="hTit">
+  <div class="row" style="justify-content:space-between"><h2 id="hTit" style="margin:0">Historial</h2><button class="btn sec min" id="hCerrar" type="button">Cerrar</button></div>
+  <div id="hBody"></div>
+</div></div>
+<div id="big" class="big" hidden><img id="bigImg" alt="Comprobante ampliado"></div>
+
+<script>
+/* Conexión con Google. Dentro de Apps Script se usa google.script.run. En la página
+   publicada fuera de Google (GitHub Pages) se llama a la API con fetch SIN cookies:
+   así funciona aunque el visitante tenga cuentas de Google abiertas. */
+var PLATAFORMA_API_URL = 'https://script.google.com/macros/s/AKfycbzuYE1bYyOW3s9CFllTh28KgD0BpSifhSSB5rpEC9S-LSGtI-WBL_tO3UfsPHz-Ctim/exec';
+(function () {
+  if (window.google && google.script && google.script.run) return;
+  function llamar(fn, args, h) {
+    if (!PLATAFORMA_API_URL) { if (h.f) h.f(new Error('Falta configurar la dirección de la plataforma.')); return; }
+    fetch(PLATAFORMA_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ fn: fn, args: args }), credentials: 'omit', redirect: 'follow', cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (j) { if (j && j.ok) { if (h.s) h.s(j.v); } else if (h.f) h.f(new Error(j && j.e ? j.e : 'No se pudo completar la operación. Intenta de nuevo.')); })
+      .catch(function () { if (h.f) h.f(new Error('No se pudo conectar con la plataforma. Revisa tu conexión e intenta de nuevo.')); });
+  }
+  function runner(h) {
+    return new Proxy({}, { get: function (_, k) {
+      if (k === 'withSuccessHandler') return function (f) { return runner(Object.assign({}, h, { s: f })); };
+      if (k === 'withFailureHandler') return function (f) { return runner(Object.assign({}, h, { f: f })); };
+      return function () { llamar(k, Array.prototype.slice.call(arguments), h); };
+    } });
+  }
+  window.google = { script: { run: runner({}) } };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const S = { rol: 'supervisor', token: '', permisos: [], res: null, pag: 0, panel: null, opciones: null };
+  const POR_PAG = 50;
+  const ESTADOS = ['Pagado', 'No pagado', 'Observado', 'Inválido'];
+
+  function el(tag, props, kids) {
+    const n = document.createElement(tag);
+    if (props) Object.keys(props).forEach(k => {
+      if (k === 'text') n.textContent = props[k];
+      else if (k === 'class') n.className = props[k];
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), props[k]);
+      else n.setAttribute(k, props[k]);
+    });
+    (kids || []).forEach(c => { if (c !== null && c !== undefined) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  const pill = t => el('span', { class: 'pill p-' + String(t).replace(/ /g, '-'), text: t });
+  const fmtN = v => (v === null || v === undefined || v === '') ? '' : Number(v).toLocaleString('es-PE');
+  const fmtS = v => (v === null || v === undefined || v === '') ? '' : 'S/ ' + Number(v).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  function msg(id, t, err) { $(id).textContent = t || ''; $(id).className = 'msg' + (err ? ' err' : ''); }
+  function ocupado(b, on) { if (b) b.disabled = on; }
+
+  function run(fn, args, ok, boton, msgId) {
+    ocupado(boton, true);
+    let r = google.script.run.withSuccessHandler(x => { ocupado(boton, false); ok(x); })
+      .withFailureHandler(e => {
+        ocupado(boton, false);
+        const t = e && e.message ? e.message.replace(/^Error:\s*/, '') : 'No se pudo completar la operación.';
+        if (/sesión venció/.test(t)) { salir(t); return; }
+        if (msgId) msg(msgId, t, true);
+      });
+    r[fn].apply(r, args);
+  }
+
+  // ---------------------------------------------------------- login
+  document.querySelectorAll('.rol').forEach(b => b.addEventListener('click', () => {
+    S.rol = b.dataset.rol;
+    document.querySelectorAll('.rol').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('clave').focus();
+  }));
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    msg('msgLogin', 'Verificando…');
+    run('apiLogin', [S.rol, $('clave').value], r => {
+      if (!r || !r.token) { msg('msgLogin', 'La plataforma respondió de forma inesperada. Avisa al administrador.', true); return; }
+      S.token = r.token; S.permisos = r.permisos || [];
+      $('clave').value = ''; msg('msgLogin', '');
+      $('login').hidden = true; $('app').hidden = false;
+      $('rolInfo').textContent = 'Ingresaste como ' + r.nombreRol;
+      mostrarCarga(r.carga);
+      document.querySelector('[data-tab="panel"]').hidden = S.permisos.indexOf('panel') < 0;
+      document.querySelector('[data-tab="admin"]').hidden = S.permisos.indexOf('admin') < 0;
+      abrirTab('consulta');
+      cargarOpciones();
+    }, $('entrar'), 'msgLogin');
+  });
+  function salir(aviso) {
+    const t = S.token; S.token = ''; S.res = null; S.panel = null; S.opciones = null;
+    $('app').hidden = true; $('login').hidden = false; $('resultado').hidden = true; $('hist').hidden = true;
+    msg('msgLogin', aviso || 'Sesión cerrada.', !!aviso);
+    if (t) google.script.run.apiSalir(t);
+  }
+  $('salir').addEventListener('click', () => salir());
+
+  function mostrarCarga(c) {
+    $('cargaInfo').textContent = c ? ('Datos al ' + (c.ultimo_corte || '—') + ' · ' + fmtN(c.imei_vigentes) + ' IMEI · ' + fmtN(c.archivos) + ' cortes') : 'Todavía no hay una carga publicada';
+  }
+
+  // ---------------------------------------------------------- tabs
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => abrirTab(t.dataset.tab)));
+  function abrirTab(n) {
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === n)));
+    ['consulta', 'panel', 'admin'].forEach(x => { $('tab-' + x).hidden = x !== n; });
+    if (n === 'panel' && !S.panel) cargarPanel();
+    if (n === 'admin') cargarAdmin();
+  }
+
+  // ---------------------------------------------------------- consulta
+  function llenar(sel, items, primero) {
+    const v = sel.value; sel.textContent = '';
+    sel.appendChild(el('option', { value: '', text: primero }));
+    items.forEach(i => sel.appendChild(el('option', { value: i, text: i })));
+    sel.value = v;
+  }
+  function cargarOpciones() {
+    run('apiOpciones', [S.token], o => {
+      S.opciones = o; mostrarCarga(o.carga);
+      llenar($('fSup'), o.supervisores, 'Todos los supervisores');
+      llenar($('fPro'), o.promotores, 'Todos los promotores');
+      llenar($('fArch'), o.archivos, 'Todos los archivos');
+      llenar($('fEstado'), o.estados, 'Todos los estados');
+    }, null, 'msgConsulta');
+  }
+  function contarImeis() {
+    const n = ($('imeis').value.match(/\d{15}/g) || []).length;
+    $('imeiCount').textContent = fmtN(n) + ' IMEI' + (n > 5000 ? ' · máximo 5.000' : '');
+  }
+  $('imeis').addEventListener('input', contarImeis);
+  function consultar(todo) {
+    msg('msgConsulta', 'Consultando…');
+    // "Ver todo" muestra el consolidado completo con los filtros elegidos, sin la lista de IMEI.
+    const c = { imeis: todo ? '' : $('imeis').value, referencia: todo ? '' : $('ref').value, supervisor: $('fSup').value,
+      promotor: $('fPro').value, archivo: $('fArch').value, estado: $('fEstado').value, todo: !!todo };
+    run('apiConsultar', [S.token, c], r => { msg('msgConsulta', ''); S.res = r; S.pag = 0; pintarResultado(); },
+      todo ? $('todo') : $('consultar'), 'msgConsulta');
+  }
+  $('consultar').addEventListener('click', () => consultar(false));
+  $('todo').addEventListener('click', () => consultar(true));
+  $('limpiar').addEventListener('click', () => {
+    ['imeis', 'ref'].forEach(i => { $(i).value = ''; });
+    ['fSup', 'fPro', 'fArch', 'fEstado'].forEach(i => { $(i).value = ''; });
+    contarImeis(); $('resultado').hidden = true; msg('msgConsulta', '');
+  });
+
+  const VISTA = [['IMEI', 'IMEI'], ['ESTADO', 'Estado'], ['SUPERVISOR', 'Supervisor'], ['PROMOTOR', 'Promotor'],
+    ['ASESOR', 'Asesor'], ['PDV', 'PDV'], ['MODELO', 'Modelo'], ['MONTO_APROBADO', 'Monto'], ['METODO', 'Método'],
+    ['ID_PAGO', 'ID de pago'], ['FECHA_CORTE', 'Corte del estado'], ['FUNDAMENTO', 'Fundamento']];
+
+  function pintarResultado() {
+    const r = S.res, ix = {};
+    r.cols.forEach((c, i) => { ix[c] = i; });
+    $('resultado').hidden = false;
+    $('resTitulo').textContent = fmtN(r.total) + ' IMEI encontrados';
+    const chips = $('chips'); chips.textContent = '';
+    ESTADOS.forEach(e => chips.appendChild(el('span', {}, [pill(e), ' ' + fmtN(r.conteos[e] || 0)])));
+    const nf = $('noEnc'); nf.textContent = '';
+    if (r.noEncontrados.length) nf.appendChild(el('div', { class: 'nf' }, [el('b', { text: fmtN(r.noEncontrados.length) + ' IMEI sin coincidencia en los cortes: ' }), r.noEncontrados.slice(0, 300).join(', ') + (r.noEncontrados.length > 300 ? '…' : '')]));
+    if (r.totalInvalidos) nf.appendChild(el('div', { class: 'nf' }, [el('b', { text: fmtN(r.totalInvalidos) + (r.totalInvalidos === 1 ? ' valor no tiene 15 dígitos y se ignoró: ' : ' valores no tienen 15 dígitos y se ignoraron: ') }), r.invalidos.slice(0, 50).join(', ')]));
+    const t = $('tabla'); t.textContent = '';
+    t.appendChild(el('thead', {}, [el('tr', {}, VISTA.map(v => el('th', { class: v[0] === 'MONTO_APROBADO' ? 'num' : '', text: v[1] })))]));
+    const tb = el('tbody');
+    const ini = S.pag * POR_PAG, fin = Math.min(r.filas.length, ini + POR_PAG);
+    for (let i = ini; i < fin; i++) {
+      const f = r.filas[i];
+      tb.appendChild(el('tr', { class: 'click', title: 'Ver historial', onclick: () => abrirHistorial(f, ix) }, VISTA.map(v => {
+        const val = f[ix[v[0]]];
+        if (v[0] === 'ESTADO') return el('td', {}, [pill(val)]);
+        if (v[0] === 'MONTO_APROBADO') return el('td', { class: 'num', text: fmtS(val) });
+        if (v[0] === 'FUNDAMENTO') return el('td', { class: 'corto', title: val || '' }, [el('span', { text: val || '' })]);
+        return el('td', { text: val === null ? '' : String(val) });
+      })));
+    }
+    t.appendChild(tb);
+    const pags = Math.max(1, Math.ceil(r.filas.length / POR_PAG));
+    $('pagInfo').textContent = 'Página ' + (S.pag + 1) + ' de ' + pags;
+    $('prev').disabled = S.pag === 0; $('next').disabled = S.pag >= pags - 1;
+  }
+  $('prev').addEventListener('click', () => { if (S.pag > 0) { S.pag--; pintarResultado(); } });
+  $('next').addEventListener('click', () => { S.pag++; pintarResultado(); });
+
+  // ---------------------------------------------------------- historial y comprobantes
+  function abrirHistorial(f, ix) {
+    $('hist').hidden = false;
+    $('hTit').textContent = 'IMEI ' + f[ix.IMEI];
+    const body = $('hBody'); body.textContent = '';
+    body.appendChild(el('div', { class: 'entry cur' }, [
+      el('div', { class: 'row' }, [el('b', { text: 'Estado vigente ' }), pill(f[ix.ESTADO])]),
+      el('p', { class: 'muted', text: f[ix.FUNDAMENTO] || '' }),
+      el('dl', { class: 'kv' }, [['Supervisor', 'SUPERVISOR'], ['Promotor', 'PROMOTOR'], ['Asesor', 'ASESOR'], ['PDV', 'PDV'],
+        ['Modelo', 'MODELO'], ['Monto aprobado', 'MONTO_APROBADO'], ['Método', 'METODO'], ['ID de pago', 'ID_PAGO'],
+        ['Fecha de venta', 'FECHA_VENTA'], ['Corte del estado', 'FECHA_CORTE'], ['Último corte', 'ULTIMO_CORTE'],
+        ['Apariciones', 'APARICIONES'], ['Observación', 'OBSERVACION']].reduce((a, p) => {
+        const v = f[ix[p[1]]]; a.push(el('dt', { text: p[0] })); a.push(el('dd', { text: p[1] === 'MONTO_APROBADO' ? fmtS(v) : (v === null ? '' : String(v)) })); return a;
+      }, []))
+    ]));
+    const cont = el('div', {}, [el('p', { class: 'muted', text: 'Cargando historial…' })]);
+    body.appendChild(cont);
+    run('apiHistorial', [S.token, f[ix.IMEI]], h => {
+      cont.textContent = '';
+      const hx = {}; h.cols.forEach((c, i) => { hx[c] = i; });
+      cont.appendChild(el('h3', { text: 'Historial por corte (' + h.filas.length + ')' }));
+      h.filas.forEach(r => {
+        const box = el('div', { class: 'entry' + (r[hx.RESPALDA_VIGENTE] ? ' cur' : '') }, [
+          el('div', { class: 'row' }, [el('b', { text: r[hx.FECHA_CORTE] || 'Sin fecha' }), pill(r[hx.ESTADO]),
+            r[hx.RESPALDA_VIGENTE] ? el('span', { class: 'muted', text: 'Respalda el estado vigente' }) : null]),
+          el('p', { class: 'muted', style: 'margin:6px 0', text: r[hx.FUNDAMENTO] || '' }),
+          el('div', { class: 'muted', text: r[hx.ARCHIVO] + ' · hoja ' + r[hx.HOJA] + ' · fila ' + r[hx.FILA] +
+            (r[hx.ID_PAGO] ? ' · ' + r[hx.ID_PAGO] : '') + (r[hx.METODO] ? ' · ' + r[hx.METODO] : '') +
+            (r[hx.MONTO_APROBADO] ? ' · ' + fmtS(r[hx.MONTO_APROBADO]) : '') }),
+          r[hx.OBSERVACION] ? el('div', { class: 'muted', text: 'Observación: ' + r[hx.OBSERVACION] }) : null
+        ]);
+        const ev = String(r[hx.EVIDENCIAS] || '').split('|').filter(Boolean);
+        if (ev.length && h.verComprobantes) {
+          const th = el('div', { class: 'thumbs' });
+          const b = el('button', { class: 'btn sec min', type: 'button', text: 'Ver comprobante' + (ev.length > 1 ? 's (' + ev.length + ')' : '') });
+          b.addEventListener('click', () => {
+            b.remove();
+            ev.forEach(n => run('apiMiniatura', [S.token, n], m => {
+              th.appendChild(el('img', { src: m.dataUrl, alt: 'Comprobante ' + n, onclick: () => { $('bigImg').src = m.dataUrl; $('big').hidden = false; } }));
+            }, null, null));
+          });
+          box.appendChild(b); box.appendChild(th);
+        } else if (ev.length) {
+          box.appendChild(el('div', { class: 'muted', text: ev.length + ' comprobante(s) registrados.' }));
+        }
+        cont.appendChild(box);
+      });
+    }, null, null);
+  }
+  $('hCerrar').addEventListener('click', () => { $('hist').hidden = true; });
+  $('hist').addEventListener('click', e => { if (e.target === $('hist')) $('hist').hidden = true; });
+  $('big').addEventListener('click', () => { $('big').hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('big').hidden = true; $('hist').hidden = true; } });
+
+  // ---------------------------------------------------------- descargas
+  function nombreArchivo(base, ext) { return base + '_' + new Date().toISOString().slice(0, 10) + '.' + ext; }
+  // Generador XLSX propio (sin librerías externas): ZIP sin compresión + hojas con texto en línea.
+  const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function zip(archivos) {
+    const enc = new TextEncoder(), partes = [], central = [];
+    let off = 0;
+    const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    archivos.forEach(f => {
+      const nombre = enc.encode(f.n), datos = enc.encode(f.d), crc = crc32(datos);
+      const loc = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(datos.length), u32(datos.length), u16(nombre.length), u16(0));
+      partes.push(new Uint8Array(loc), nombre, datos);
+      central.push(new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(datos.length), u32(datos.length),
+        u16(nombre.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(off))), nombre);
+      off += loc.length + nombre.length + datos.length;
+    });
+    const tamC = central.reduce((a, x) => a + x.length, 0);
+    const fin = new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(archivos.length), u16(archivos.length), u32(tamC), u32(off), u16(0)));
+    return new Blob(partes.concat(central, [fin]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  const xmlEsc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+  function colRef(i) { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+  function hojaXml(h) {
+    const texto = h.texto || [];
+    const filas = [h.cols].concat(h.filas).map((f, r) => '<row r="' + (r + 1) + '">' + f.map((v, c) => {
+      const ref = colRef(c) + (r + 1);
+      if (v === null || v === undefined || v === '') return '';
+      if (r > 0 && typeof v === 'number' && isFinite(v) && texto.indexOf(h.cols[c]) < 0) return '<c r="' + ref + '"><v>' + v + '</v></c>';
+      return '<c r="' + ref + '" t="inlineStr"' + (r === 0 ? ' s="1"' : '') + '><is><t xml:space="preserve">' + xmlEsc(v) + '</t></is></c>';
+    }).join('') + '</row>').join('');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetData>' + filas + '</sheetData></worksheet>';
+  }
+  function descargarXlsx(hojas, nombre) {
+    const nombres = hojas.map((h, i) => xmlEsc(h.nombre.replace(/[\\\/?*\[\]:]/g, ' ').slice(0, 31) || ('Hoja' + (i + 1))));
+    const X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    const archivos = [
+      { n: '[Content_Types].xml', d: X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+        hojas.map((_, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>' },
+      { n: '_rels/.rels', d: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { n: 'xl/workbook.xml', d: X + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+        nombres.map((n, i) => '<sheet name="' + n + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets></workbook>' },
+      { n: 'xl/_rels/workbook.xml.rels', d: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        hojas.map((_, i) => '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') +
+        '<Relationship Id="rId' + (hojas.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+      { n: 'xl/styles.xml', d: X + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>' }
+    ].concat(hojas.map((h, i) => ({ n: 'xl/worksheets/sheet' + (i + 1) + '.xml', d: hojaXml(h) })));
+    const a = el('a', { href: URL.createObjectURL(zip(archivos)), download: nombre }); document.body.appendChild(a); a.click(); a.remove();
+  }
+  function descargarCsv(cols, filas, nombre) {
+    const esc = v => {
+      let s = v === null || v === undefined ? '' : String(v);
+      if (/^[=+\-@]/.test(s)) s = "'" + s;
+      return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const ii = cols.indexOf('IMEI');
+    const lineas = [cols.map(esc).join(',')].concat(filas.map(f => f.map((v, i) => i === ii ? '="' + v + '"' : esc(v)).join(',')));
+    const blob = new Blob(['﻿' + lineas.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = el('a', { href: URL.createObjectURL(blob), download: nombre }); document.body.appendChild(a); a.click(); a.remove();
+  }
+  $('dlXlsx').addEventListener('click', () => { if (S.res) descargarXlsx([{ nombre: 'Consulta', cols: S.res.cols, filas: S.res.filas, texto: ['IMEI', 'ID_PAGO'] }], nombreArchivo('consulta_plataforma', 'xlsx')); });
+  $('dlCsv').addEventListener('click', () => { if (S.res) descargarCsv(S.res.cols, S.res.filas, nombreArchivo('consulta_plataforma', 'csv')); });
+
+  // ---------------------------------------------------------- panel GTM
+  function tabla(id, cabeceras, filas) {
+    const t = $(id); t.textContent = '';
+    t.appendChild(el('thead', {}, [el('tr', {}, cabeceras.map(c => el('th', { class: c[2] ? 'num' : '', text: c[0] })))]));
+    const tb = el('tbody');
+    filas.forEach(f => tb.appendChild(el('tr', {}, cabeceras.map(c => {
+      const v = typeof c[1] === 'function' ? c[1](f) : f[c[1]];
+      if (v instanceof Node) return el('td', {}, [v]);
+      const txt = v === null || v === undefined ? '' : String(v);
+      if (c[3] === 'corto') return el('td', { class: 'corto', title: txt }, [el('span', { text: txt })]);
+      return el('td', { class: c[2] ? 'num' : '', text: txt });
+    }))));
+    if (!filas.length) tb.appendChild(el('tr', {}, [el('td', { colspan: String(cabeceras.length), class: 'muted', text: 'Sin datos.' })]));
+    t.appendChild(tb);
+  }
+  function kpi(v, t) { return el('div', { class: 'kpi' }, [el('b', { text: v }), el('span', { text: t })]); }
+  function cargarPanel() {
+    msg('msgPanel', 'Calculando el panel…');
+    run('apiPanel', [S.token, $('pSup').value], p => { S.panel = p; msg('msgPanel', ''); pintarPanel(); }, null, 'msgPanel');
+  }
+  $('pSup').addEventListener('change', cargarPanel);
+  function pintarPanel() {
+    const p = S.panel, r = p.resumen;
+    if ($('pSup').options.length <= 1) llenar($('pSup'), p.supervisores, 'Todos los supervisores');
+    const k = $('pKpis'); k.textContent = '';
+    [[fmtN(r.imei), 'IMEI vigentes'], [r.pctPagado + ' %', 'Pagado'], [fmtN(r.estados['Pagado']), 'Pagados'],
+      [fmtN(r.pendientes), 'Pendientes (No pagado + Observado)'], [fmtN(r.estados['Inválido']), 'Inválidos (sin pago)'],
+      [fmtS(r.montoPagado), 'Monto pagado'], [fmtS(r.montoPendiente), 'Monto pendiente'],
+      [fmtN(r.prioridadPdv['Alta']), 'PDV en prioridad Alta'], [fmtN(r.sinPdv), 'IMEI sin PDV']].forEach(x => k.appendChild(kpi(x[0], x[1])));
+    $('pReglas').textContent = p.reglas + ' Días contados al ' + p.hoy + '.';
+    const cols = [['PDV / Grupo', 'grupo'], ['Prioridad', f => pill(f.prioridad)], ['Supervisor principal', 'supervisor'], ['IMEI', 'imei', 1],
+      ['Pagado', 'pagado', 1], ['No pagado', 'noPagado', 1], ['Observado', 'observado', 1], ['Inválido', 'invalido', 1],
+      ['% pagado', 'pctPagado', 1], ['Monto pendiente', f => fmtS(f.montoPendiente), 1], ['Días', 'dias', 1]];
+    tabla('pPdv', cols, p.pdv);
+    tabla('pSupT', [['Supervisor', 'grupo']].concat(cols.slice(1, 2), cols.slice(3)), p.supervisoresTabla);
+    tabla('pMod', [['Modelo', 'modelo'], ['Unidades pagadas', 'unidades', 1], ['Monto pagado', f => fmtS(f.monto), 1]], p.modelos);
+    tabla('pCierre', [['Mes de venta', 'mes'], ['Límite pagos', 'limite'], ['Entrega CAR', 'car'], ['Etapa', 'etapa'],
+      ['IMEI', 'imei', 1], ['Pagado en plazo', 'enPlazo', 1], ['Fuera de plazo', 'fueraPlazo', 1], ['Sin pagar', 'sinPagar', 1]], p.cierre);
+    tabla('pEvo', [['Corte', 'corte'], ['IMEI', 'imei', 1], ['Pagado', 'pagado', 1], ['No pagado', 'noPagado', 1], ['Observado', 'observado', 1], ['Inválido', 'invalido', 1]], p.evolucion);
+    $('pPendTit').textContent = 'Pendientes (' + fmtN(p.pendientes.length) + '), más antiguos primero';
+    const pc = p.pendientesCols;
+    tabla('pPend', pc.map((c, i) => [c, f => i === 1 ? pill(f[i]) : (i === 6 ? fmtS(f[i]) : f[i]), i === 6 || i === 8, c === 'FUNDAMENTO' ? 'corto' : '']), p.pendientes.slice(0, 500));
+  }
+  $('pDl').addEventListener('click', () => {
+    const p = S.panel; if (!p) return;
+    const aoa = (arr, keys) => arr.map(o => keys.map(k => o[k]));
+    const kp = ['grupo', 'prioridad', 'supervisor', 'imei', 'pagado', 'noPagado', 'observado', 'invalido', 'pendientes', 'pctPagado', 'montoPagado', 'montoPendiente', 'dias', 'puntaje'];
+    const hp = ['GRUPO', 'PRIORIDAD', 'SUPERVISOR_PRINCIPAL', 'IMEI', 'PAGADO', 'NO_PAGADO', 'OBSERVADO', 'INVALIDO', 'PENDIENTES', 'PCT_PAGADO', 'MONTO_PAGADO', 'MONTO_PENDIENTE', 'DIAS', 'PUNTAJE'];
+    descargarXlsx([
+      { nombre: 'PDV', cols: hp, filas: aoa(p.pdv, kp) },
+      { nombre: 'SUPERVISORES', cols: hp, filas: aoa(p.supervisoresTabla, kp) },
+      { nombre: 'MODELOS', cols: ['MODELO', 'UNIDADES_PAGADAS', 'MONTO_PAGADO'], filas: aoa(p.modelos, ['modelo', 'unidades', 'monto']) },
+      { nombre: 'CIERRE', cols: ['MES', 'LIMITE', 'CAR', 'ETAPA', 'IMEI', 'EN_PLAZO', 'FUERA_PLAZO', 'SIN_PAGAR'], filas: aoa(p.cierre, ['mes', 'limite', 'car', 'etapa', 'imei', 'enPlazo', 'fueraPlazo', 'sinPagar']) },
+      { nombre: 'EVOLUCION', cols: ['CORTE', 'IMEI', 'PAGADO', 'NO_PAGADO', 'OBSERVADO', 'INVALIDO'], filas: aoa(p.evolucion, ['corte', 'imei', 'pagado', 'noPagado', 'observado', 'invalido']) },
+      { nombre: 'PENDIENTES', cols: p.pendientesCols, filas: p.pendientes, texto: ['IMEI'] }
+    ], nombreArchivo('panel_gtm' + (p.filtro ? '_' + p.filtro.replace(/[^A-Za-z0-9]+/g, '_') : ''), 'xlsx'));
+  });
+
+  // ---------------------------------------------------------- administración
+  function cargarAdmin(aviso) {
+    if (!aviso) msg('msgAdmin', 'Cargando…');
+    run('apiAdmin', [S.token], a => {
+      msg('msgAdmin', aviso || '');
+      const act = $('aActiva'); act.textContent = '';
+      if (a.activa) {
+        const e = a.activa.estados || {};
+        act.appendChild(el('div', {}, [el('b', { text: a.activa.id }), ' · publicada ' + String(a.activa.publicado || '').slice(0, 16).replace('T', ' ') +
+          ' · último corte ' + a.activa.ultimo_corte + ' · ' + fmtN(a.activa.imei_vigentes) + ' IMEI · ' + fmtN(a.activa.registros) + ' registros · ' +
+          fmtN(a.activa.miniaturas) + ' miniaturas · Pagado ' + fmtN(e['Pagado']) + ', No pagado ' + fmtN(e['No pagado']) + ', Observado ' + fmtN(e['Observado']) + ', Inválido ' + fmtN(e['Inválido'])]));
+      } else act.textContent = 'Sin carga publicada.';
+      tabla('aDisp', [['Carpeta en Drive', 'nombre'], ['Subida', f => String(f.fecha).slice(0, 16).replace('T', ' ')],
+        ['', f => el('button', { class: 'btn min', type: 'button', text: a.activa && f.nombre.indexOf(String(a.activa.id).replace('carga_', '')) >= 0 ? 'Volver a publicar' : 'Publicar',
+          onclick: ev => publicar(f, ev.target) })]], a.disponibles);
+      const inc = a.incidencias;
+      tabla('aInc', inc ? inc.cols.map((c, i) => [c, i]) : [['Incidencias', 0]], inc ? inc.rows : []);
+      $('aHoja').textContent = a.hoja ? 'Copia en Google Sheets (Plataforma - Consulta): ' + a.hoja : '';
+    }, null, 'msgAdmin');
+  }
+  function publicar(f, boton) {
+    msg('msgAdmin', 'Publicando ' + f.nombre + '… puede tardar uno o dos minutos. No cierres la página.');
+    run('apiPublicar', [S.token, f.id], r => {
+      const e = r.resumen.estados || {};
+      const aviso = 'Publicado: ' + fmtN(r.resumen.imei_vigentes) + ' IMEI · Pagado ' + fmtN(e['Pagado']) + ' · No pagado ' + fmtN(e['No pagado']) +
+        ' · Observado ' + fmtN(e['Observado']) + ' · Inválido ' + fmtN(e['Inválido']) + ' · ' + fmtN(r.resumen.miniaturas) + ' miniaturas.';
+      msg('msgAdmin', aviso);
+      S.panel = null; mostrarCarga(r.resumen); cargarOpciones(); cargarAdmin(aviso);
+    }, boton, 'msgAdmin');
+  }
+})();
+</script>
+</body>
+</html>
